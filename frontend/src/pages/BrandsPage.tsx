@@ -17,10 +17,10 @@ export default function BrandsPage({ user }: { user: User }) {
 
   return (
     <div>
-      <div className="row between">
+      <div className="page-head">
         <div>
           <h1>Brands</h1>
-          <p className="muted">Each brand has one kit that every ad is written from.</p>
+          <p className="muted sub">Each brand has one kit that every ad is written from.</p>
         </div>
         {canEdit && (
           <button className="btn" onClick={() => setCreating(true)}>
@@ -28,11 +28,11 @@ export default function BrandsPage({ user }: { user: User }) {
           </button>
         )}
       </div>
-      <Alert>{error}</Alert>
+      {error && <div className="mt-2"><Alert>{error}</Alert></div>}
       {brands === null ? (
         <p className="muted">Loading…</p>
       ) : brands.length === 0 ? (
-        <div className="card" style={{ textAlign: "center", padding: 40 }}>
+        <div className="card empty">
           <h2>Set up your first brand</h2>
           <p className="muted">Enter a website and Adpress drafts a brand kit from it.</p>
           {canEdit && (
@@ -45,8 +45,8 @@ export default function BrandsPage({ user }: { user: User }) {
         <div className="brand-list">
           {brands.map((b) => (
             <a key={b.id} className="card brand-card" href={`#/brands/${b.id}/${b.kit_ready ? "generate" : "setup"}`}>
-              <div className="row between">
-                <h2>{b.name}</h2>
+              <div className="row between nowrap">
+                <h2 className="truncate">{b.name}</h2>
                 {b.kit_ready ? (
                   <span className="badge ok">Kit ready</span>
                 ) : b.current_kit_version ? (
@@ -55,10 +55,11 @@ export default function BrandsPage({ user }: { user: User }) {
                   <span className="badge">Setting up</span>
                 )}
               </div>
-              <p className="muted small">{b.website_url || "No website"}</p>
-              <p className="small">
-                {INDUSTRIES.find(([k]) => k === b.industry)?.[1]} · {b.ad_count} ads
-              </p>
+              <p className="muted small truncate">{b.website_url || "No website"}</p>
+              <div className="foot">
+                <span>{INDUSTRIES.find(([k]) => k === b.industry)?.[1]}</span>
+                <span className="num">{b.ad_count} ads</span>
+              </div>
             </a>
           ))}
         </div>
@@ -112,7 +113,7 @@ function NewBrand({ onClose }: { onClose: () => void }) {
             ))}
           </select>
         </Field>
-        <div className="row" style={{ justifyContent: "flex-end" }}>
+        <div className="modal-actions">
           <button type="button" className="btn ghost" onClick={onClose}>
             Cancel
           </button>

@@ -101,7 +101,7 @@ export default function KitTab({ brand, user, onChange }: { brand: Brand; user: 
 
   if (missing)
     return (
-      <div className="card">
+      <div className="card empty">
         <h2>No kit yet</h2>
         <p className="muted">Add your website or social content, then build the kit.</p>
         <a className="btn" href={`#/brands/${brand.id}/setup`}>
@@ -130,16 +130,18 @@ export default function KitTab({ brand, user, onChange }: { brand: Brand; user: 
 
   return (
     <div className="stack">
-      <div className="row between">
+      <div className="kit-bar">
         <div className="row">
           {guessedKeys.length ? (
             <span className="badge warn">{guessedKeys.length} guessed fields to review before generating</span>
           ) : (
             <span className="badge ok">Kit reviewed: ready to generate</span>
           )}
-          <span className="muted small">
-            {saveState === "saving" ? "Saving…" : saveState === "pending" ? "Unsaved changes" : saveState === "saved" ? "All changes saved" : ""}
-          </span>
+          {!readOnly && (
+            <span className={`save-state ${saveState}`} aria-live="polite">
+              {saveState === "saving" ? "Saving…" : saveState === "pending" ? "Unsaved changes" : saveState === "saved" ? "All changes saved" : "Not saved"}
+            </span>
+          )}
         </div>
         <div className="row">
           {!readOnly && guessedKeys.length > 0 && (
@@ -151,12 +153,11 @@ export default function KitTab({ brand, user, onChange }: { brand: Brand; user: 
             Export .md
           </button>
           {!readOnly && (
-            <label className="btn secondary small" style={{ margin: 0 }}>
+            <label className="btn secondary small file">
               Import .md
               <input
                 type="file"
                 accept=".md,text/markdown"
-                hidden
                 onChange={(e) => e.target.files?.[0] && importMd(e.target.files[0])}
               />
             </label>
@@ -174,7 +175,7 @@ export default function KitTab({ brand, user, onChange }: { brand: Brand; user: 
         <Alert>{error}</Alert>
       )}
 
-      <fieldset disabled={readOnly} style={{ border: 0, padding: 0, margin: 0 }} className="stack">
+      <fieldset disabled={readOnly} className="plain stack">
         <Section title="Voice" kit={kit} keys={["core_voice", "voice_dials"]} update={update}>
           <Field label="Core voice" hint={`${kit.core_voice.length}/300 characters`}>
             <textarea
@@ -187,7 +188,8 @@ export default function KitTab({ brand, user, onChange }: { brand: Brand; user: 
             {(Object.keys(kit.voice_dials) as (keyof VoiceDials)[]).map((d) => (
               <div className="dial" key={d}>
                 <label>
-                  <span style={{ textTransform: "capitalize" }}>{d}</span> <span>{kit.voice_dials[d]}</span>
+                  <span className="cap">{d}</span>
+                  <span>{kit.voice_dials[d]}</span>
                 </label>
                 <input
                   type="range"
@@ -195,6 +197,7 @@ export default function KitTab({ brand, user, onChange }: { brand: Brand; user: 
                   max={5}
                   value={kit.voice_dials[d]}
                   onChange={(e) => set("voice_dials", { ...kit.voice_dials, [d]: Number(e.target.value) })}
+                  aria-label={d}
                 />
               </div>
             ))}
@@ -202,7 +205,7 @@ export default function KitTab({ brand, user, onChange }: { brand: Brand; user: 
         </Section>
 
         <Section title="Words" kit={kit} keys={["always_words", "never_words"]} update={update}>
-          <div className="grid2">
+          <div className="grid-2">
             <Field label="Always use">
               <ChipList values={kit.always_words} onChange={(v) => set("always_words", v)} disabled={readOnly} />
             </Field>
@@ -226,7 +229,7 @@ export default function KitTab({ brand, user, onChange }: { brand: Brand; user: 
             addLabel="Add fact"
             title={(f) => f.claim || "New fact"}
             render={(f, change) => (
-              <div className="grid2">
+              <div className="grid-2">
                 <Field label="Claim">
                   <input value={f.claim} onChange={(e) => change({ ...f, claim: e.target.value })} />
                 </Field>
@@ -245,17 +248,19 @@ export default function KitTab({ brand, user, onChange }: { brand: Brand; user: 
             blank={{ hex: "#1F3A5F", role: "primary" }}
             addLabel="Add color"
             title={(c) => (
-              <span className="row">
-                <span className="swatch" style={{ background: c.hex }} /> {c.hex} · {c.role}
+              <span className="row nowrap">
+                <span className="swatch" style={{ background: c.hex }} />
+                <span className="num">{c.hex}</span>
+                <span className="muted cap">{c.role}</span>
               </span>
             )}
             render={(c, change) => (
-              <div className="row">
+              <div className="row nowrap">
                 <input type="color" value={c.hex.length === 7 ? c.hex : "#000000"}
                   onChange={(e) => change({ ...c, hex: e.target.value.toUpperCase() })} />
-                <input value={c.hex} onChange={(e) => change({ ...c, hex: e.target.value })} style={{ width: 110 }} />
-                <select value={c.role} onChange={(e) => change({ ...c, role: e.target.value as Color["role"] })}
-                  style={{ width: 160 }}>
+                <input className="hex" value={c.hex} onChange={(e) => change({ ...c, hex: e.target.value })} aria-label="Hex" />
+                <select className="role" value={c.role} onChange={(e) => change({ ...c, role: e.target.value as Color["role"] })}
+                  aria-label="Role">
                   <option value="primary">Primary</option>
                   <option value="secondary">Secondary</option>
                   <option value="accent">Accent</option>
@@ -264,7 +269,7 @@ export default function KitTab({ brand, user, onChange }: { brand: Brand; user: 
               </div>
             )}
           />
-          <div className="grid2">
+          <div className="grid-2 mt-4">
             <Field label="Heading font">
               <input value={kit.typography.heading}
                 onChange={(e) => set("typography", { ...kit.typography, heading: e.target.value })} />
@@ -277,7 +282,7 @@ export default function KitTab({ brand, user, onChange }: { brand: Brand; user: 
         </Section>
 
         <Section title="Compliance" kit={kit} keys={["compliance"]} update={update}>
-          <div className="grid2">
+          <div className="grid-2">
             <Field label="Industry">
               <select
                 value={kit.compliance.industry}
@@ -319,28 +324,21 @@ export default function KitTab({ brand, user, onChange }: { brand: Brand; user: 
 
         <Section title="Platform themes" subtitle="How the voice shifts on each platform." kit={kit}
           keys={PLATFORMS.map((p) => `platform_themes.${p}`)} update={update}>
-          {PLATFORMS.map((p) => {
-            const theme = kit.platform_themes[p];
+          {PLATFORMS.filter((p) => kit.platform_themes[p]).map((p) => {
+            const theme = kit.platform_themes[p]!;
             const key = `platform_themes.${p}`;
-            if (!theme)
-              return (
-                <button key={p} className="btn ghost small" style={{ marginRight: 6 }}
-                  onClick={() => set("platform_themes", { ...kit.platform_themes, [p]: blankTheme() }, [key])}>
-                  + {PLATFORM_LABELS[p]}
-                </button>
-              );
             const change = (t: PlatformTheme) => set("platform_themes", { ...kit.platform_themes, [p]: t }, [key]);
             return (
               <div className="list-item" key={p}>
                 <div className="list-item-head">
-                  <h3 style={{ margin: 0 }}>{PLATFORM_LABELS[p as Platform]}</h3>
-                  <button className="btn ghost small" onClick={() => {
+                  <h3>{PLATFORM_LABELS[p as Platform]}</h3>
+                  <button type="button" className="btn ghost small" onClick={() => {
                     const next = { ...kit.platform_themes };
                     delete next[p];
                     set("platform_themes", next, [key]);
                   }}>Remove</button>
                 </div>
-                <div className="grid2">
+                <div className="grid-3">
                   {(["audience", "voice_shift", "length", "hashtags", "emoji", "cta_style"] as const).map((f) => (
                     <Field key={f} label={f.replace("_", " ").replace(/^./, (c) => c.toUpperCase())}>
                       <input value={theme[f]} onChange={(e) => change({ ...theme, [f]: e.target.value })} />
@@ -350,6 +348,16 @@ export default function KitTab({ brand, user, onChange }: { brand: Brand; user: 
               </div>
             );
           })}
+          {PLATFORMS.some((p) => !kit.platform_themes[p]) && (
+            <div className="add-row">
+              {PLATFORMS.filter((p) => !kit.platform_themes[p]).map((p) => (
+                <button key={p} type="button" className="btn secondary small"
+                  onClick={() => set("platform_themes", { ...kit.platform_themes, [p]: blankTheme() }, [`platform_themes.${p}`])}>
+                  + {PLATFORM_LABELS[p]}
+                </button>
+              ))}
+            </div>
+          )}
         </Section>
 
         <Section title="Audiences" kit={kit} keys={["audiences"]} update={update}>
@@ -361,14 +369,14 @@ export default function KitTab({ brand, user, onChange }: { brand: Brand; user: 
             title={(a) => a.name || "New audience"}
             render={(a, change) => (
               <>
-                <div className="grid2">
+                <div className="grid-2">
                   <Field label="Name"><input value={a.name} onChange={(e) => change({ ...a, name: e.target.value })} /></Field>
                   <Field label="Key message"><input value={a.key_message} onChange={(e) => change({ ...a, key_message: e.target.value })} /></Field>
                 </div>
                 <Field label="Who they are" hint="Describe needs and situation, never protected traits like age, religion, or family status.">
                   <textarea value={a.who} onChange={(e) => change({ ...a, who: e.target.value })} />
                 </Field>
-                <div className="grid2">
+                <div className="grid-2">
                   <Field label="Goals"><ChipList values={a.goals} onChange={(v) => change({ ...a, goals: v })} disabled={readOnly} /></Field>
                   <Field label="Objections"><ChipList values={a.objections} onChange={(v) => change({ ...a, objections: v })} disabled={readOnly} /></Field>
                   <Field label="Best platforms"><ChipList values={a.best_platforms} onChange={(v) => change({ ...a, best_platforms: v })} disabled={readOnly} /></Field>
@@ -388,11 +396,11 @@ export default function KitTab({ brand, user, onChange }: { brand: Brand; user: 
             title={(l) => l.name || "New location"}
             render={(l, change) => (
               <>
-                <div className="grid2">
+                <div className="grid-2">
                   <Field label="Name"><input value={l.name} onChange={(e) => change({ ...l, name: e.target.value })} /></Field>
                   <Field label="Local phrasing"><input value={l.phrasing} onChange={(e) => change({ ...l, phrasing: e.target.value })} /></Field>
                 </div>
-                <div className="grid2">
+                <div className="grid-3">
                   <Field label="References (landmarks, neighborhoods)"><ChipList values={l.references} onChange={(v) => change({ ...l, references: v })} disabled={readOnly} /></Field>
                   <Field label="Seasonal hooks"><ChipList values={l.seasonal_hooks} onChange={(v) => change({ ...l, seasonal_hooks: v })} disabled={readOnly} /></Field>
                   <Field label="Avoid"><ChipList values={l.avoid} onChange={(v) => change({ ...l, avoid: v })} disabled={readOnly} /></Field>
@@ -410,7 +418,7 @@ export default function KitTab({ brand, user, onChange }: { brand: Brand; user: 
             addLabel="Add offer"
             title={(o) => o.headline || "New offer"}
             render={(o, change) => (
-              <div className="grid2">
+              <div className="grid-4">
                 <Field label="Headline promise"><input value={o.headline} onChange={(e) => change({ ...o, headline: e.target.value })} /></Field>
                 <Field label="Proof"><input value={o.proof} onChange={(e) => change({ ...o, proof: e.target.value })} /></Field>
                 <Field label="CTA"><input value={o.cta} onChange={(e) => change({ ...o, cta: e.target.value })} /></Field>
@@ -432,7 +440,7 @@ export default function KitTab({ brand, user, onChange }: { brand: Brand; user: 
             render={(x, change) => (
               <>
                 <Field label="Text"><textarea value={x.text} onChange={(e) => change({ ...x, text: e.target.value })} /></Field>
-                <div className="grid2">
+                <div className="grid-2">
                   <Field label="Platform"><input value={x.platform} onChange={(e) => change({ ...x, platform: e.target.value })} /></Field>
                   <Field label="Rating">
                     <select value={x.rating} onChange={(e) => change({ ...x, rating: e.target.value as Example["rating"] })}>
@@ -478,8 +486,9 @@ function Section({
       </div>
       {guesses.map((k) => (
         <div className="guess" key={k}>
-          <strong>Guessed{k.includes(".") ? ` (${k.split(".")[1]})` : ""}:</strong> {kit.guessed[k]}
-          <span className="spacer" />
+          <span className="grow">
+            <strong>Guessed{k.includes(".") ? ` (${k.split(".")[1]})` : ""}:</strong> {kit.guessed[k]}
+          </span>
           <button type="button" className="btn secondary small" onClick={() => update((x) => x, [k])}>
             Looks right
           </button>

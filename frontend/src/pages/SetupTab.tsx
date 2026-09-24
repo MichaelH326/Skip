@@ -98,9 +98,9 @@ export default function SetupTab({ brand, user, onChange }: { brand: Brand; user
           <h2>Website</h2>
           <span className="muted small">{website.length} pages imported</span>
         </div>
-        <div className="row">
-          <input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="example.com" style={{ flex: 1 }}
-            disabled={!canEdit} />
+        <div className="row nowrap">
+          <input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="example.com" className="grow"
+            disabled={!canEdit} aria-label="Website" />
           {canEdit && (
             <button className="btn secondary" onClick={importSite} disabled={!!running || !url.trim()}>
               {website.length ? "Re-import" : "Import"}
@@ -108,8 +108,8 @@ export default function SetupTab({ brand, user, onChange }: { brand: Brand; user
           )}
         </div>
         {siteMeta && (
-          <div className="row small" style={{ marginTop: 10 }}>
-            <span className="muted">Colors found:</span>
+          <div className="row small mt-3" style={{ columnGap: "var(--s3)" }}>
+            <span className="muted">Colors</span>
             {(siteMeta.colors || []).map((c) => (
               <span key={c} className="swatch" style={{ background: c }} title={c} />
             ))}
@@ -117,8 +117,9 @@ export default function SetupTab({ brand, user, onChange }: { brand: Brand; user
           </div>
         )}
         {website.length > 0 && (
-          <details style={{ marginTop: 10 }}>
-            <summary className="small">Show imported pages</summary>
+          <details className="mt-3">
+            <summary>Show imported pages</summary>
+            <div className="mt-2">
             {website.map((s) => (
               <div className="source" key={s.id}>
                 <a href={s.url || "#"} target="_blank" rel="noreferrer" className="small">
@@ -127,6 +128,7 @@ export default function SetupTab({ brand, user, onChange }: { brand: Brand; user
                 <pre>{s.text.slice(0, 600)}</pre>
               </div>
             ))}
+            </div>
           </details>
         )}
       </div>
@@ -138,7 +140,7 @@ export default function SetupTab({ brand, user, onChange }: { brand: Brand; user
         </div>
         {canEdit && (
           <form onSubmit={addSource}>
-            <div className="grid2">
+            <div className="grid-2">
               <Field label="Platform">
                 <select value={platform} onChange={(e) => setPlatform(e.target.value as Platform)}>
                   {PLATFORMS.map((p) => (
@@ -155,16 +157,17 @@ export default function SetupTab({ brand, user, onChange }: { brand: Brand; user
                 </select>
               </Field>
             </div>
-            <Field label="Text">
+            <div className="field mt-3">
+              <label>Text</label>
               <textarea value={text} onChange={(e) => setText(e.target.value)} required />
-            </Field>
-            <div className="row between">
-              <label className="check">
+            </div>
+            <div className="row between top nowrap">
+              <label className="check top">
                 <input type="checkbox" checked={owned} onChange={(e) => setOwned(e.target.checked)} />
                 Our own content (untick for competitor or third-party examples; Adpress will never copy those)
               </label>
               <button className="btn secondary" disabled={!text.trim()}>
-                Add
+                Add content
               </button>
             </div>
           </form>
@@ -173,15 +176,16 @@ export default function SetupTab({ brand, user, onChange }: { brand: Brand; user
           const items = pasted.filter((s) => s.platform === p);
           if (!items.length) return null;
           return (
-            <div key={p} style={{ marginTop: 14 }}>
+            <div key={p} className="source-group mt-4">
               <h3>
                 {PLATFORM_LABELS[p]} <span className="muted small">({items.length})</span>
               </h3>
               {items.map((s) => (
                 <div className="source" key={s.id}>
-                  <div className="row between small">
-                    <span>
-                      <span className="badge">{s.kind}</span> {!s.owned && <span className="badge warn">third-party</span>}
+                  <div className="row between nowrap">
+                    <span className="row">
+                      <span className="badge">{s.kind}</span>
+                      {!s.owned && <span className="badge warn">third-party</span>}
                     </span>
                     {canEdit && (
                       <button
@@ -204,10 +208,10 @@ export default function SetupTab({ brand, user, onChange }: { brand: Brand; user
       </div>
 
       {canEdit && (
-        <div className="card row between">
+        <div className="card callout">
           <div>
             <h2>Build the brand kit</h2>
-            <p className="muted small" style={{ margin: 0 }}>
+            <p className="muted small mt-1">
               {brand.current_kit_version
                 ? "Rebuilding keeps your locations, offers, and examples, and replaces the rest."
                 : "Adpress drafts your voice, words, colors, audiences, and platform themes. You review every guess."}

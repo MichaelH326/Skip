@@ -58,13 +58,13 @@ export default function BrandPage({ brandId, tab, user }: { brandId: string; tab
 
   return (
     <div>
-      <div className="row between">
-        <div>
-          <a href="#/brands" className="small">
+      <div className="page-head">
+        <div className="grow">
+          <a href="#/brands" className="crumb">
             ← All brands
           </a>
-          <h1 style={{ marginTop: 6 }}>{brand.name}</h1>
-          <p className="muted small">
+          <h1 className="truncate">{brand.name}</h1>
+          <p className="muted small sub truncate">
             {INDUSTRIES.find(([k]) => k === brand.industry)?.[1]}
             {brand.website_url ? ` · ${brand.website_url}` : ""}
             {brand.current_kit_version ? ` · kit v${brand.current_kit_version}` : ""}

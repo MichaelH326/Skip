@@ -39,7 +39,7 @@ export default function AuthPage({ onAuthed }: { onAuthed: (token: string, user:
       </div>
       <form className="card" onSubmit={submit}>
         <h1>{mode === "login" ? "Sign in" : "Create your workspace"}</h1>
-        <p className="muted">
+        <p className="muted lede">
           {mode === "login" ? "On-brand ads for every platform." : "Set up a brand in about 10 minutes."}
         </p>
         <Alert>{error}</Alert>
@@ -61,10 +61,10 @@ export default function AuthPage({ onAuthed }: { onAuthed: (token: string, user:
             autoComplete={mode === "login" ? "current-password" : "new-password"}
           />
         </Field>
-        <button className="btn" disabled={busy} style={{ width: "100%", justifyContent: "center" }}>
+        <button className="btn block mt-2" disabled={busy}>
           {busy ? "Please wait…" : mode === "login" ? "Sign in" : "Create workspace"}
         </button>
-        <p className="small muted" style={{ marginTop: 14, textAlign: "center" }}>
+        <p className="small muted switch">
           {mode === "login" ? "New to Adpress? " : "Already have an account? "}
           <a
             href="#"

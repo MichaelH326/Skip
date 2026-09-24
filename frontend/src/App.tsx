@@ -52,7 +52,8 @@ export default function App() {
     <div className="shell">
       <header className="topbar">
         <a className="logo" href="#/brands">
-          <span className="logo-mark">A</span> Adpress
+          <span className="logo-mark">A</span>
+          <span className="word">Adpress</span>
         </a>
         <nav className="topnav">
           <a href="#/brands" className={section !== "team" ? "active" : ""}>
@@ -63,7 +64,7 @@ export default function App() {
           </a>
         </nav>
         <div className="topbar-user">
-          <span className="muted small">
+          <span className="who muted small truncate">
             {user.email} · {user.role}
           </span>
           <button

@@ -33,9 +33,15 @@ export default function TeamPage({ user }: { user: User }) {
 
   return (
     <div>
-      <h1>Team</h1>
-      <p className="muted">{user.workspace_name}</p>
+      <div className="page-head">
+        <div>
+          <h1>Team</h1>
+          <p className="muted sub">{user.workspace_name}</p>
+        </div>
+      </div>
+      <div className="stack">
       <div className="card">
+        <div className="table-wrap">
         <table className="simple">
           <thead>
             <tr>
@@ -52,33 +58,39 @@ export default function TeamPage({ user }: { user: User }) {
             ))}
           </tbody>
         </table>
-        <p className="small muted" style={{ marginTop: 10 }}>
+        </div>
+        <p className="small muted mt-3">
           Owners can override blocking flags and delete brands. Editors create and edit. Viewers can only look.
         </p>
       </div>
       {user.role === "Owner" && (
         <form className="card" onSubmit={add}>
-          <h2>Add a teammate</h2>
+          <div className="card-title">
+            <h2>Add a teammate</h2>
+          </div>
           <Alert>{error}</Alert>
           <Alert kind="ok">{ok}</Alert>
-          <div className="grid2">
+          <div className="grid-3">
             <Field label="Email">
               <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
             </Field>
             <Field label="Temporary password" hint="At least 8 characters">
               <input value={password} onChange={(e) => setPassword(e.target.value)} minLength={8} required />
             </Field>
+            <Field label="Role">
+              <select value={role} onChange={(e) => setRole(e.target.value as Role)}>
+                <option>Editor</option>
+                <option>Viewer</option>
+                <option>Owner</option>
+              </select>
+            </Field>
           </div>
-          <Field label="Role">
-            <select value={role} onChange={(e) => setRole(e.target.value as Role)}>
-              <option>Editor</option>
-              <option>Viewer</option>
-              <option>Owner</option>
-            </select>
-          </Field>
-          <button className="btn">Add teammate</button>
+          <div className="row end mt-4">
+            <button className="btn">Add teammate</button>
+          </div>
         </form>
       )}
+      </div>
     </div>
   );
 }

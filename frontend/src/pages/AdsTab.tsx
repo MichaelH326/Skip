@@ -111,14 +111,15 @@ export default function AdsTab({ brand, user, onChange }: { brand: Brand; user: 
           <Stat v={metrics.cost_per_ad_usd != null ? `$${metrics.cost_per_ad_usd.toFixed(3)}` : "—"} l="AI cost per ad" />
         </div>
       )}
-      <div className="ads-toolbar">
-        <select value={status} onChange={(e) => setStatus(e.target.value)}>
+      <div className="toolbar">
+        <div className="group">
+        <select value={status} onChange={(e) => setStatus(e.target.value)} aria-label="Status">
           <option value="">All active</option>
           <option value="draft">Drafts</option>
           <option value="approved">Approved</option>
           <option value="exported">Exported</option>
         </select>
-        <select value={platform} onChange={(e) => setPlatform(e.target.value)}>
+        <select value={platform} onChange={(e) => setPlatform(e.target.value)} aria-label="Platform">
           <option value="">All platforms</option>
           {PLATFORMS.map((p) => (
             <option key={p} value={p}>
@@ -128,13 +129,14 @@ export default function AdsTab({ brand, user, onChange }: { brand: Brand; user: 
         </select>
         {requestId && (
           <button className="btn ghost small" onClick={() => setRequestId("")}>
-            Showing latest run only ✕
+            Latest run only ✕
           </button>
         )}
-        <span className="spacer" />
+        </div>
         {canEdit && (
-          <>
-            <select value={exportPlatform} onChange={(e) => setExportPlatform(e.target.value as Platform)}>
+          <div className="group export">
+            <select value={exportPlatform} onChange={(e) => setExportPlatform(e.target.value as Platform)}
+              aria-label="Export platform">
               {PLATFORMS.map((p) => (
                 <option key={p} value={p}>
                   {PLATFORM_LABELS[p]}
@@ -144,15 +146,19 @@ export default function AdsTab({ brand, user, onChange }: { brand: Brand; user: 
             <button className="btn" onClick={exportCsv}>
               Export {selectedForPlatform.length ? `${selectedForPlatform.length} selected` : "approved"} as CSV
             </button>
-          </>
+          </div>
         )}
       </div>
-      <Alert>{error}</Alert>
-      <Alert kind="ok">{notice}</Alert>
+      {(error || notice) && (
+        <div className="stack-sm notices">
+          <Alert>{error}</Alert>
+          <Alert kind="ok">{notice}</Alert>
+        </div>
+      )}
       {ads === null ? (
         <p className="muted">Loading…</p>
       ) : ads.length === 0 ? (
-        <div className="card" style={{ textAlign: "center", padding: 40 }}>
+        <div className="card empty">
           <h2>No ads here yet</h2>
           <a className="btn" href={`#/brands/${brand.id}/generate`}>
             Generate ads
@@ -282,63 +288,67 @@ function AdCard({
 
   return (
     <div className={`card ad-card ${selected ? "selected" : ""}`}>
-      <div className="ad-meta">
+      <div className="ad-head">
         {canEdit && (
           <input type="checkbox" checked={selected} onChange={(e) => onSelect(e.target.checked)} aria-label="Select for export" />
         )}
-        <span className="badge accent">{format?.name || ad.format}</span>
-        <span className={`badge ${ad.status === "approved" ? "ok" : ad.status === "exported" ? "accent" : ""}`}>
+        <span className="ad-format truncate" title={format?.name || ad.format}>{format?.name || ad.format}</span>
+        <span className={`badge cap ${ad.status === "approved" ? "ok" : ad.status === "exported" ? "accent" : ""}`}>
           {ad.status}
         </span>
-        {blocking.length > 0 && <span className="badge danger">{blocking.length} blocking</span>}
+      </div>
+      <div className="ad-sub">
+        <span className="truncate" title={[ad.audience, ad.location, ad.offer, ad.angle].filter(Boolean).join(" · ")}>
+          {[ad.audience, ad.location, ad.offer, ad.angle].filter(Boolean).join(" · ") || "General audience"}
+        </span>
         {ad.edited && <span className="badge">edited</span>}
-      </div>
-      <div className="small muted">
-        {[ad.audience, ad.location, ad.offer, ad.angle].filter(Boolean).join(" · ") || "General"}
+        {blocking.length > 0 && <span className="badge danger">{blocking.length} blocking</span>}
       </div>
 
-      {editing && format ? (
-        <EditFields format={format} content={draft} onChange={setDraft} />
-      ) : (
-        <AdPreview ad={ad} kit={kit} websiteUrl={brand.website_url} />
-      )}
+      <div className="ad-body">
+        {editing && format ? (
+          <EditFields format={format} content={draft} onChange={setDraft} />
+        ) : (
+          <AdPreview ad={ad} kit={kit} websiteUrl={brand.website_url} />
+        )}
 
-      {ad.flags.length > 0 && (
-        <div>
-          {ad.flags.map((f, i) => (
-            <div key={i} className={`flag ${f.overridden ? "overridden" : f.severity}`}>
-              <div className="flag-head">
-                {f.overridden ? "Overridden: " : ""}
-                {f.label}
-                {f.source === "review" && <span className="badge">AI review</span>}
-              </div>
-              <div>{f.message}</div>
-              {f.overridden && f.override_reason && <div className="small">Reason: {f.override_reason}</div>}
-              {canEdit && !f.overridden && (
-                <div className="flag-actions">
-                  {f.words && f.suggestion !== null && ad.status !== "superseded" && (
-                    <button className="btn secondary small" disabled={busy}
-                      onClick={() => patch({ content: applySuggestion(ad.content, f) })}>
-                      {f.suggestion ? `Replace with “${f.suggestion}”` : `Remove “${f.words}”`}
-                    </button>
-                  )}
-                  {f.severity === "blocking" && user.role === "Owner" && (
-                    <button className="btn ghost small" onClick={() => setOverriding(i)}>
-                      Override
-                    </button>
-                  )}
+        {ad.flags.length > 0 && (
+          <div className="flags">
+            {ad.flags.map((f, i) => (
+              <div key={i} className={`flag ${f.overridden ? "overridden" : f.severity}`}>
+                <div className="flag-head">
+                  {f.overridden ? "Overridden: " : ""}
+                  {f.label}
+                  {f.source === "review" && <span className="badge">AI review</span>}
                 </div>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
+                <div>{f.message}</div>
+                {f.overridden && f.override_reason && <div className="xs mt-1">Reason: {f.override_reason}</div>}
+                {canEdit && !f.overridden && (
+                  <div className="flag-actions">
+                    {f.words && f.suggestion !== null && ad.status !== "superseded" && (
+                      <button className="btn secondary small" disabled={busy}
+                        onClick={() => patch({ content: applySuggestion(ad.content, f) })}>
+                        {f.suggestion ? `Replace with “${f.suggestion}”` : `Remove “${f.words}”`}
+                      </button>
+                    )}
+                    {f.severity === "blocking" && user.role === "Owner" && (
+                      <button className="btn ghost small" onClick={() => setOverriding(i)}>
+                        Override
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
 
-      {ad.content.image_direction && !editing && (
-        <div className="small">
-          <strong>Image direction:</strong> {ad.content.image_direction}
-        </div>
-      )}
+        {ad.content.image_direction && !editing && (
+          <div className="image-note">
+            <strong>Image direction:</strong> {ad.content.image_direction}
+          </div>
+        )}
+      </div>
 
       {canEdit && (
         <div className="ad-actions">
@@ -351,6 +361,7 @@ function AdCard({
               <button className="btn ghost small" onClick={() => { setDraft(ad.content); setEditing(false); }}>
                 Cancel
               </button>
+              {busy && <Spinner />}
             </>
           ) : (
             <>
@@ -368,11 +379,12 @@ function AdCard({
               <button className="btn secondary small" onClick={() => setEditing(true)} disabled={!format}>
                 Edit
               </button>
+              {busy && <Spinner />}
               <select
                 className="small"
-                style={{ width: "auto", padding: "4px 8px" }}
                 value=""
                 disabled={busy}
+                aria-label="Refine"
                 onChange={(e) => {
                   if (e.target.value === "custom") setCustom(true);
                   else if (e.target.value) refine(e.target.value);
@@ -386,7 +398,6 @@ function AdCard({
                 ))}
                 <option value="custom">Custom instruction…</option>
               </select>
-              {busy && <Spinner />}
             </>
           )}
         </div>
@@ -431,12 +442,12 @@ function EditFields({ format, content, onChange }: { format: FormatSpec; content
             <div className="edit-field" key={spec.key}>
               <label>{spec.label} ({spec.multi.min}–{spec.multi.max})</label>
               {items.map((item, i) => (
-                <div key={i} style={{ marginBottom: 4 }}>
-                  <div className="row">
-                    <input value={item} style={{ flex: 1 }}
+                <div key={i} className="edit-item">
+                  <div className="row nowrap">
+                    <input value={item} className="grow"
                       onChange={(e) => setField(spec.key, items.map((x, j) => (j === i ? e.target.value : x)))} />
                     <button type="button" className="btn ghost small"
-                      onClick={() => setField(spec.key, items.filter((_, j) => j !== i))}>✕</button>
+                      aria-label="Remove" onClick={() => setField(spec.key, items.filter((_, j) => j !== i))}>✕</button>
                   </div>
                   {counter(item, spec.recommended, spec.limit)}
                 </div>
@@ -462,7 +473,7 @@ function EditFields({ format, content, onChange }: { format: FormatSpec; content
           </div>
         );
       })}
-      <div className="grid2">
+      <div className="grid-2 mt-3">
         <Field label="Call to action">
           <input value={content.cta} onChange={(e) => onChange({ ...content, cta: e.target.value })} />
         </Field>
@@ -476,9 +487,11 @@ function EditFields({ format, content, onChange }: { format: FormatSpec; content
         )}
       </div>
       {format.image_direction && (
+        <div className="mt-3">
         <Field label="Image direction">
           <textarea value={content.image_direction} onChange={(e) => onChange({ ...content, image_direction: e.target.value })} />
         </Field>
+        </div>
       )}
     </div>
   );
@@ -490,11 +503,12 @@ function OverrideModal({ flag, onClose, onSubmit }: { flag: Flag; onClose: () =>
     <Modal onClose={onClose}>
       <h2>Override “{flag.label}”</h2>
       <p className="small">{flag.message}</p>
-      <p className="small muted">Overrides are logged with your name, the time, and your reason.</p>
+      <p className="small muted mt-2">Overrides are logged with your name, the time, and your reason.</p>
+      <div className="mt-4" />
       <Field label="Reason">
         <textarea value={reason} onChange={(e) => setReason(e.target.value)} autoFocus />
       </Field>
-      <div className="row" style={{ justifyContent: "flex-end" }}>
+      <div className="modal-actions">
         <button className="btn ghost" onClick={onClose}>Cancel</button>
         <button className="btn" disabled={reason.trim().length < 3} onClick={() => onSubmit(reason.trim())}>
           Override
@@ -512,7 +526,7 @@ function CustomRefine({ onClose, onSubmit }: { onClose: () => void; onSubmit: (t
       <Field label="Instruction" hint='e.g. "lead with the free valuation", "mention the waterfront"'>
         <input value={text} onChange={(e) => setText(e.target.value)} autoFocus maxLength={500} />
       </Field>
-      <div className="row" style={{ justifyContent: "flex-end" }}>
+      <div className="modal-actions">
         <button className="btn ghost" onClick={onClose}>Cancel</button>
         <button className="btn" disabled={!text.trim()} onClick={() => onSubmit(text.trim())}>
           Rewrite

@@ -26,7 +26,6 @@ export default function AdPreview({ ad, kit, websiteUrl }: { ad: Ad; kit: Kit | 
   const f = c.fields;
   const name = kit?.name || "Brand";
   const primary = kit?.colors.find((x) => x.role === "primary")?.hex || kit?.colors[0]?.hex || "#1F3A5F";
-  const accent = kit?.colors.find((x) => x.role === "accent")?.hex || kit?.colors[1]?.hex || primary;
   const themeColor = kit?.platform_themes[ad.platform]?.colors?.[0] || primary;
   const host = hostOf(websiteUrl);
   const tags = c.hashtags.length ? <span className="mock-tags"> {c.hashtags.join(" ")}</span> : null;
@@ -35,13 +34,13 @@ export default function AdPreview({ ad, kit, websiteUrl }: { ad: Ad; kit: Kit | 
       {name.slice(0, 1).toUpperCase()}
     </div>
   );
-  const image = (tall = false, overlay?: string) => (
+  const image = (shape: "" | "square" | "story" | "wide" = "", overlay?: string) => (
     <div
-      className={`mock-image ${tall ? "story" : ""}`}
-      style={{ background: `linear-gradient(135deg, ${themeColor}, ${accent})`, color: onColor(themeColor) }}
+      className={`mock-image ${shape}`}
+      style={{ background: themeColor, color: onColor(themeColor) }}
       title="Image direction"
     >
-      {overlay ? <strong style={{ fontSize: 16 }}>{overlay}</strong> : c.image_direction || "Image"}
+      {overlay ? <strong>{overlay}</strong> : c.image_direction || "Image"}
     </div>
   );
 
@@ -81,11 +80,12 @@ export default function AdPreview({ ad, kit, websiteUrl }: { ad: Ad; kit: Kit | 
               <div className="mock-sub">Sponsored</div>
             </div>
           </div>
-          {image()}
+          {image("square")}
           <div className="mock-foot" style={{ background: themeColor, color: onColor(themeColor) }}>
-            <div className="t h">{c.cta || "Learn more"}</div>›
+            <div className="t h">{c.cta || "Learn more"}</div>
+            <span aria-hidden="true">›</span>
           </div>
-          <div className="mock-body" style={{ paddingTop: 10 }}>
+          <div className="mock-body pad-top">
             <strong>{name.toLowerCase().replace(/\s+/g, "")}</strong> {str(f.caption)}
             {tags}
           </div>
@@ -94,14 +94,13 @@ export default function AdPreview({ ad, kit, websiteUrl }: { ad: Ad; kit: Kit | 
     case "instagram_story":
       return (
         <div className="mock">
-          <div style={{ position: "relative" }}>
-            {image(true, str(f.primary_text))}
-            <div style={{ position: "absolute", top: 10, left: 10, display: "flex", gap: 6, alignItems: "center",
-              color: onColor(themeColor), fontSize: 12, fontWeight: 700 }}>
+          <div className="mock-story">
+            {image("story", str(f.primary_text))}
+            <div className="top" style={{ color: onColor(themeColor) }}>
               {name} · Sponsored
             </div>
-            <div style={{ position: "absolute", bottom: 14, left: 0, right: 0, textAlign: "center" }}>
-              <span className="mock-cta" style={{ background: "#fff", color: "#111" }}>
+            <div className="bottom">
+              <span className="mock-cta light">
                 {c.cta || "Learn more"}
               </span>
             </div>
@@ -128,7 +127,7 @@ export default function AdPreview({ ad, kit, websiteUrl }: { ad: Ad; kit: Kit | 
               <div className="h">{str(f.headline)}</div>
               <div className="d">{host}</div>
             </div>
-            <span className="mock-cta" style={{ border: "1px solid #0a66c2", color: "#0a66c2", background: "#fff" }}>
+            <span className="mock-cta outline">
               {c.cta || "Learn more"}
             </span>
           </div>
@@ -152,8 +151,8 @@ export default function AdPreview({ ad, kit, websiteUrl }: { ad: Ad; kit: Kit | 
       return (
         <div className="mock">
           {image()}
-          <div className="mock-body" style={{ paddingTop: 10 }}>
-            <div className="h" style={{ fontWeight: 700 }}>{str(f.long_headline) || str(f.short_headline)}</div>
+          <div className="mock-body pad-top">
+            <strong>{str(f.long_headline) || str(f.short_headline)}</strong>
             <div className="mock-sub">{str(f.description)}</div>
           </div>
           <div className="mock-foot">
@@ -178,18 +177,18 @@ export default function AdPreview({ ad, kit, websiteUrl }: { ad: Ad; kit: Kit | 
             {str(f.post)}
             {tags}
           </div>
-          <div style={{ position: "relative" }}>
-            {image()}
-          </div>
-          <div className="mock-body small muted" style={{ marginTop: -6 }}>
-            {str(f.card_headline)} · {host}
+          <div className="mock-card">
+            {image("wide")}
+            <div className="cap">
+              {str(f.card_headline)} · {host}
+            </div>
           </div>
         </div>
       );
     default:
       return (
         <div className="mock">
-          <div className="mock-body" style={{ paddingTop: 10 }}>
+          <div className="mock-body pad-top">
             {Object.values(f).map(str).join("\n\n")}
           </div>
         </div>

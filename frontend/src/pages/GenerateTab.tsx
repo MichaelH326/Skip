@@ -33,7 +33,7 @@ export default function GenerateTab({ brand, user }: { brand: Brand; user: User 
 
   if (!brand.kit_ready)
     return (
-      <div className="card">
+      <div className="card empty">
         <h2>Finish the brand kit first</h2>
         <p className="muted">
           {brand.current_kit_version
@@ -81,55 +81,59 @@ export default function GenerateTab({ brand, user }: { brand: Brand; user: User 
           <h2>Platforms and formats</h2>
           <span className="muted small">Pick several to get the same message written natively for each</span>
         </div>
+        <div className="format-grid">
         {PLATFORMS.map((p) => {
           const fs = formats.filter((f) => f.platform === p);
           if (!fs.length) return null;
           return (
-            <div key={p} style={{ marginBottom: 10 }}>
-              <div className="small muted" style={{ marginBottom: 4 }}>
-                {PLATFORM_LABELS[p]}
-              </div>
+            <div key={p} className="format-group">
+              <div className="xs">{PLATFORM_LABELS[p]}</div>
               <div className="picker">
                 {fs.map((f) => (
-                  <span
+                  <button
+                    type="button"
                     key={f.key}
                     className={`pick ${chosen.includes(f.key) ? "on" : ""}`}
                     onClick={() => setChosen(toggle(chosen, f.key))}
-                    role="checkbox"
-                    aria-checked={chosen.includes(f.key)}
+                    aria-pressed={chosen.includes(f.key)}
                   >
                     {f.name}
-                  </span>
+                  </button>
                 ))}
               </div>
             </div>
           );
         })}
+        </div>
       </div>
 
-      <div className="grid2">
+      <div className="grid-2">
         <div className="card">
-          <h2>Audiences</h2>
-          <p className="muted small">None selected writes for a general audience. Several run each one.</p>
+          <div className="card-title">
+            <h2>Audiences</h2>
+            <span className="muted small">None selected = general audience</span>
+          </div>
           <div className="picker">
             {kit?.audiences.map((a) => (
-              <span key={a.name} className={`pick ${audiences.includes(a.name) ? "on" : ""}`}
-                onClick={() => setAudiences(toggle(audiences, a.name))}>
+              <button type="button" key={a.name} className={`pick ${audiences.includes(a.name) ? "on" : ""}`}
+                aria-pressed={audiences.includes(a.name)} onClick={() => setAudiences(toggle(audiences, a.name))}>
                 {a.name}
-              </span>
+              </button>
             ))}
             {!kit?.audiences.length && <span className="muted small">Add audiences in the kit.</span>}
           </div>
         </div>
         <div className="card">
-          <h2>Locations</h2>
-          <p className="muted small">Several run every audience × location.</p>
+          <div className="card-title">
+            <h2>Locations</h2>
+            <span className="muted small">Each runs every audience</span>
+          </div>
           <div className="picker">
             {kit?.locations.map((l) => (
-              <span key={l.name} className={`pick ${locations.includes(l.name) ? "on" : ""}`}
-                onClick={() => setLocations(toggle(locations, l.name))}>
+              <button type="button" key={l.name} className={`pick ${locations.includes(l.name) ? "on" : ""}`}
+                aria-pressed={locations.includes(l.name)} onClick={() => setLocations(toggle(locations, l.name))}>
                 {l.name}
-              </span>
+              </button>
             ))}
             {!kit?.locations.length && <span className="muted small">Add locations in the kit.</span>}
           </div>
@@ -137,7 +141,7 @@ export default function GenerateTab({ brand, user }: { brand: Brand; user: User 
       </div>
 
       <div className="card">
-        <div className="grid2">
+        <div className="grid-3">
           <Field label="Offer">
             <select value={offer} onChange={(e) => setOffer(e.target.value)}>
               <option value="">No specific offer</option>
@@ -156,8 +160,8 @@ export default function GenerateTab({ brand, user }: { brand: Brand; user: User 
               onChange={(e) => setCount(Math.min(20, Math.max(1, Number(e.target.value) || 1)))} />
           </Field>
         </div>
-        <div className="row between">
-          <span className={tooMany ? "small" : "muted small"} style={tooMany ? { color: "var(--danger)" } : {}}>
+        <div className="gen-summary">
+          <span className={`small num ${tooMany ? "over-limit" : "muted"}`} aria-live="polite">
             {chosen.length
               ? `${combos} combination${combos === 1 ? "" : "s"} × ${count} = ${total} ads` +
                 (tooMany ? ` (limit ${MAX_PAIRS} combinations and ${MAX_ADS} ads per run)` : "")
