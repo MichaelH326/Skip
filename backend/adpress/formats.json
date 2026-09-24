@@ -1,0 +1,61 @@
+{
+  "_note": "Recommended and hard character limits per format. Figures are approximate; confirm against each platform's current ad specs before launch. Adding a format here needs no code change.",
+  "formats": [
+    {
+      "key": "facebook_feed", "platform": "facebook", "name": "Facebook feed ad",
+      "image_direction": "1:1 or 4:5", "max_hashtags": 3,
+      "fields": [
+        {"key": "primary_text", "label": "Primary text", "recommended": 125, "limit": 2200},
+        {"key": "headline", "label": "Headline", "recommended": 40, "limit": 255},
+        {"key": "description", "label": "Description", "recommended": 30, "limit": 255}
+      ]
+    },
+    {
+      "key": "instagram_feed", "platform": "instagram", "name": "Instagram feed ad",
+      "image_direction": "1:1 or 4:5", "max_hashtags": 30,
+      "fields": [
+        {"key": "caption", "label": "Caption", "recommended": 125, "limit": 2200}
+      ]
+    },
+    {
+      "key": "instagram_story", "platform": "instagram", "name": "Instagram story / reel ad",
+      "image_direction": "9:16, keep text in image short", "max_hashtags": 5,
+      "fields": [
+        {"key": "primary_text", "label": "Primary text", "recommended": 125, "limit": 2200}
+      ]
+    },
+    {
+      "key": "linkedin_sponsored", "platform": "linkedin", "name": "LinkedIn sponsored content",
+      "image_direction": "1.91:1 or 1:1", "max_hashtags": 3,
+      "fields": [
+        {"key": "intro_text", "label": "Intro text", "recommended": 150, "limit": 600},
+        {"key": "headline", "label": "Headline", "recommended": 70, "limit": 200}
+      ]
+    },
+    {
+      "key": "google_search", "platform": "google", "name": "Google responsive search ad",
+      "image_direction": null, "max_hashtags": 0,
+      "fields": [
+        {"key": "headlines", "label": "Headlines", "recommended": 30, "limit": 30, "multi": {"min": 3, "max": 15}},
+        {"key": "descriptions", "label": "Descriptions", "recommended": 90, "limit": 90, "multi": {"min": 2, "max": 4}}
+      ]
+    },
+    {
+      "key": "google_display", "platform": "google", "name": "Google responsive display ad",
+      "image_direction": "1.91:1 and 1:1", "max_hashtags": 0,
+      "fields": [
+        {"key": "short_headline", "label": "Short headline", "recommended": 30, "limit": 30},
+        {"key": "long_headline", "label": "Long headline", "recommended": 90, "limit": 90},
+        {"key": "description", "label": "Description", "recommended": 90, "limit": 90}
+      ]
+    },
+    {
+      "key": "x_promoted", "platform": "x", "name": "X promoted post",
+      "image_direction": "16:9 or 1:1", "max_hashtags": 2,
+      "fields": [
+        {"key": "post", "label": "Post", "recommended": 280, "limit": 280, "counts_hashtags": true},
+        {"key": "card_headline", "label": "Card headline", "recommended": 70, "limit": 70}
+      ]
+    }
+  ]
+}
